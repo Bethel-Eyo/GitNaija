@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">GitNaija</string>
+    <string name="custom_name">Damilola Ogunsola</string>
+    <string name="custom_mail">damilolaogun@yahoo.com</string>
+    <string name="error">Sorry, an error Occured!!!</string>
+    <string name="try_again">Try Again</string>
+    <string name="username">Username</string>
+    <string name="profile_url">http://www.github.com/</string>
+    <string name="genre_label">profile_url</string>
+    <string name="developer_name">Mathew Murdock</string>
+</resources>
