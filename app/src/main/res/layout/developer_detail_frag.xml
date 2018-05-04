@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/card_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="8sp"
+        app:cardCornerRadius="4sp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/user_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/developer_name"
+                android:textColor="@color/secondary_text"
+                android:textSize="20sp"
+                android:layout_marginTop="20sp"
+                android:layout_marginLeft="20sp"
+                android:textStyle="bold"
+                android:layout_centerHorizontal="true"/>
+
+            <TextView
+                android:id="@+id/user_name_tag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/user_name"
+                android:text="@string/username"
+                android:layout_centerHorizontal="true"
+                android:textColor="@color/primary_text"/>
+
+            <View
+                android:id="@+id/view1"
+                android:layout_width="wrap_content"
+                android:layout_height="1sp"
+                android:layout_below="@id/user_name_tag"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="10sp"
+                android:background="@color/secondary_text" />
+
+            <TextView
+                android:id="@+id/profile_url"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10sp"
+                android:text="@string/profile_url"
+                android:textSize="14sp"
+                android:layout_below="@id/view1"
+                android:textColor="@color/colorAccent"
+                android:layout_centerHorizontal="true"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/profile_url"
+                android:layout_marginTop="5sp"
+                android:layout_marginBottom="10sp"
+                android:layout_centerHorizontal="true"
+                android:textColor="@color/primary_text"
+                android:text="@string/genre_label"/>
+
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
+
+    <ImageView
+        android:layout_width="170dp"
+        android:layout_height="130dp"
+        android:src="@drawable/github"
+        android:layout_gravity="center"/>
+
+    <include
+        android:id="@+id/error_screen"
+        layout="@layout/error_layout"
+        android:visibility="gone"/>
+
+</LinearLayout>
