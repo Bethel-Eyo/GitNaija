@@ -1,14 +1,19 @@
 package com.eyo.bethel.gitnaija;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,21 +23,16 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.eyo.bethel.gitnaija.Api.DevListService;
+import com.eyo.bethel.gitnaija.Api.RestApiBuilder;
+import com.eyo.bethel.gitnaija.Utilities.devAdapter;
+import com.eyo.bethel.gitnaija.data.DevList;
 import com.eyo.bethel.gitnaija.data.NaijaDevelopers;
+import com.google.gson.GsonBuilder;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 
 import static com.eyo.bethel.gitnaija.Utilities.Utils.isDeviceOnline;
 
@@ -40,30 +40,17 @@ import static com.eyo.bethel.gitnaija.Utilities.Utils.isDeviceOnline;
 public class developerFragment extends Fragment {
 
     private final String PROFILE_KEY = "profile";
-    developerAdapter mDeveloperAdapter;
-    Bundle nBundle;
 
     ProgressBar progressBar;
     View emptyScreen;
     TextView emptyScreenText, tryAgain;
-    ListView listView;
+    RecyclerView recyclerView;
     ImageView errorImage;
     Toolbar toolbar;
-
-    private List<NaijaDevelopers> loadDevelopers = new ArrayList<>();
-    Context mContext;
 
     public static developerFragment newInstance() {
         developerFragment fragment = new developerFragment();
         return fragment;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (nBundle != null){
-            reload(nBundle);
-        }
     }
 
     @Nullable
@@ -75,43 +62,17 @@ public class developerFragment extends Fragment {
         emptyScreenText = (TextView) view.findViewById(R.id.err_msg);
         errorImage = (ImageView) view.findViewById(R.id.error_image);
         tryAgain = (TextView) view.findViewById(R.id.try_again);
-        listView = (ListView) view.findViewById(R.id.list_view);
+
+        recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
         toolbar = (Toolbar) view.findViewById(R.id.app_bar);
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
-        mDeveloperAdapter = new developerAdapter(getActivity());
-        listView.setAdapter(mDeveloperAdapter);
-        if (savedInstanceState != null){
-            updateDeveloperList();
+        toolbar.setTitleTextColor(getResources().getColor(R.color.icons));
 
-            nBundle = savedInstanceState.getParcelable(PROFILE_KEY);
-            mDeveloperAdapter.exchangeData(loadDevelopers);
-        }
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                NaijaDevelopers developerProfile = (NaijaDevelopers) mDeveloperAdapter.getItem(position);
-
-                ((OnDeveloperSelected) getActivity()).onDeveloperClicked(position, developerProfile);
-            }
-        });
+        updateDeveloperList();
 
         return view;
-    }
-
-    public void reload(Bundle bundle){
-        loadDevelopers = bundle.getParcelableArrayList(PROFILE_KEY);
-        if (loadDevelopers != null){
-            mDeveloperAdapter.exchangeData(loadDevelopers);
-        }else {
-            this.nBundle = bundle;
-        }
-        updateDeveloperList();
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putParcelableArrayList(PROFILE_KEY,((ArrayList<NaijaDevelopers>) loadDevelopers));
     }
 
     @Override
@@ -122,20 +83,14 @@ public class developerFragment extends Fragment {
 
     public void updateDeveloperList(){
         String nullText;
-        String parameter = "java";
         if (isDeviceOnline(getActivity())){
-            FetchDeveloperProfile fetchDeveloperProfile = new FetchDeveloperProfile();
-            fetchDeveloperProfile.execute(parameter);
+            FetchNaijaDevelopers();
         }else {
             emptyScreen.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.GONE);
             nullText = getResources().getString(R.string.error);
             emptyScreenFormat(R.drawable.cloud_problem, nullText,false);
         }
-    }
-
-    public interface OnDeveloperSelected{
-        void onDeveloperClicked(int developerPosition, NaijaDevelopers developer);
     }
 
 
@@ -150,127 +105,44 @@ public class developerFragment extends Fragment {
         }
     }
 
-    private class FetchDeveloperProfile extends AsyncTask<String, Void, List<NaijaDevelopers>> {
-        private final String LOG_TAG = FetchDeveloperProfile.class.getSimpleName();
-
-        private List<NaijaDevelopers> loadedDeveloper;
-
-        // Json response keys
-        private static final String GIT_NAME = "login";
-        private static final String GIT_PHOTO = "avatar_url";
-        private static final String GIT_PROFILE_LINK = "html_url";
-        private static final String GIT_ID = "id";
-
-        final String GIT_DEV_LIST = "items";
-
-        List<NaijaDevelopers> getDeveloperProfile(String devString) throws JSONException {
-            loadedDeveloper = new ArrayList<>();
-
-            // parsing commences using the names of the JSON objects to be extracted
-            JSONObject devProJson = new JSONObject(devString);
-            JSONArray devProArray = devProJson.getJSONArray(GIT_DEV_LIST);
-
-            for (int i = 0; i < devProArray.length(); i++){
-                JSONObject singleDevPro = devProArray.getJSONObject(i);
-
-                // get developer id
-                int id = singleDevPro.getInt(GIT_ID);
-                // get developer username
-                String username = singleDevPro.getString(GIT_NAME);
-                // get developer profile photo
-                String profile_photo = singleDevPro.getString(GIT_PHOTO);
-                // get the developer's profile url
-                String profile_url = singleDevPro.getString(GIT_PROFILE_LINK);
-
-                NaijaDevelopers mNaijaDevelopers = new NaijaDevelopers(id, profile_photo, profile_url, username);
-                loadedDeveloper.add(mNaijaDevelopers);
+    public void FetchNaijaDevelopers(){
+        String searchParams = "language:java location:lagos";
+        DevListService devService = new RestApiBuilder().getDevListService();
+        Call<DevList> devListCall = devService.getDevList(searchParams);
+        devListCall.enqueue(new Callback<DevList>() {
+            @SuppressLint("LongLogTag")
+            @Override
+            public void onResponse(Call<DevList> call, Response<DevList> response) {
+                if(response.isSuccessful()){
+                    DevList naijaDevs = response.body();
+                    Log.w("2.0 getFeed> full json wrapped in pretty printed gson =>",
+                            new GsonBuilder().setPrettyPrinting().create().toJson(response));
+                    fixAdapter(naijaDevs);
+                    progressBar.setVisibility(View.GONE);
+                } else {
+                    Toast.makeText(getContext(), "Unsuccessful response: "+response.message(), Toast.LENGTH_SHORT).show();
+                }
             }
-            return loadedDeveloper;
-        }
 
-        @Override
-        protected void onPostExecute(List<NaijaDevelopers> NaijaDeveloperses) {
-            if (NaijaDeveloperses != null){
-                mDeveloperAdapter.exchangeData(NaijaDeveloperses);
+            @Override
+            public void onFailure(Call<DevList> call, Throwable t) {
+                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
                 progressBar.setVisibility(View.GONE);
-                toolbar.setVisibility(View.VISIBLE);
-                listView.setVisibility(View.VISIBLE);
             }
-        }
+        });
+    }
 
-        @Override
-        protected List<NaijaDevelopers> doInBackground(String... params) {
+    public void fixAdapter(DevList naijaDevs){
+        devAdapter adapter = new devAdapter(naijaDevs.getItems());
+        toolbar.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.VISIBLE);
+        recyclerView.setAdapter(adapter);
+        if(adapter.getItemCount()==0) {
 
-            if (params.length == 0){
-                return null;
-            }
-            String searchQuery = params[0];
+            emptyScreen.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.GONE);
+            emptyScreenFormat(R.drawable.cloud_problem, "problem setting adapter",false);
 
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-
-            // will contain raw json responses
-            String JsonStrDevList = null;
-
-            String location = "Lagos";
-
-            try {
-                // to construct a url for github search query
-                final String BASE_URL = "https://api.github.com/search/users?";
-                final String Q_PARAM = "q";
-                final String LOC_PARAM = "location";
-
-                Uri uri = Uri.parse(BASE_URL).buildUpon()
-                        .appendQueryParameter(Q_PARAM, searchQuery)
-                        .appendQueryParameter(LOC_PARAM, location).build();
-
-                URL url = new URL(uri.toString().replace("&", "+").replace("location=","location:"));
-
-                // to create the request to developer.github.com and open the connection
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
-
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuilder stringBuilder = new StringBuilder();
-                if (inputStream == null){
-                    //Do nothing
-                    return null;
-                }
-
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String line;
-
-                while ((line = reader.readLine()) != null){
-                    stringBuilder.append(line).append("\n");
-                }
-                if (stringBuilder.length() ==0){
-                    // stuff is empty
-                    return null;
-                }
-
-                JsonStrDevList = stringBuilder.toString();
-            }catch (IOException e){
-                Log.e(LOG_TAG, "Error ooo", e);
-            }finally {
-                if (urlConnection != null){
-                    urlConnection.disconnect();
-                }
-                if (reader != null){
-                    try {
-                        reader.close();
-                    } catch (IOException e) {
-                        Log.e(LOG_TAG, "Error closing stream", e);
-                    }
-                }
-            }
-            try {
-                return getDeveloperProfile(JsonStrDevList);
-            } catch (JSONException e) {
-                Log.e(LOG_TAG, "Some Error occured", e);
-            }
-            return new ArrayList<>();
         }
     }
 

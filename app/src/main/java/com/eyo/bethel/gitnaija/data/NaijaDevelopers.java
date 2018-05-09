@@ -3,13 +3,26 @@ package com.eyo.bethel.gitnaija.data;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 import static com.eyo.bethel.gitnaija.Utilities.Utils.computeWeakHash;
 
 public class NaijaDevelopers implements Parcelable {
+    @SerializedName("id")
+    @Expose
     private int id;
+    @SerializedName("avatar_url")
+    @Expose
     private String imageUrl;
+    @SerializedName("html_url")
+    @Expose
     private String profileUrl;
+    @SerializedName("login")
+    @Expose
     private String developerUsername;
+
+    
 
     public NaijaDevelopers(int id, String imageUrl, String profileUrl, String developerUsername) {
         this.id = id;

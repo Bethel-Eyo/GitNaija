@@ -5,7 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
-public class NaijaDevs extends AppCompatActivity {
+public class NaijaDevsActivity extends AppCompatActivity {
 
     View mFragmentContainer;
 
