@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/developer_fragment"
+    android:background="@color/icons"
     android:orientation="vertical">
 
     <include
@@ -10,9 +11,9 @@
         layout="@layout/app_bar"
         android:visibility="gone"/>
 
-    <android.support.v7.widget.RecyclerView
+    <ListView
         android:layout_below="@+id/app_bar"
-        android:id="@+id/recyclerView_view"
+        android:id="@+id/list_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="invisible" />

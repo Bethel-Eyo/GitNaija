@@ -1,6 +1,8 @@
 package com.eyo.bethel.gitnaija.Api;
 
 import com.eyo.bethel.gitnaija.data.DevList;
+import com.eyo.bethel.gitnaija.data.DeveloperDetails;
+import com.eyo.bethel.gitnaija.data.NaijaDevelopers;
 
 import java.util.List;
 
@@ -15,5 +17,5 @@ public interface DevListService {
     Call<DevList> getDevList(@Query("q") String filter);
 
     @GET("/users/{username}")
-    Call<DevList> getDevUsernameDetails(@Path("username") String username);
+    Call<NaijaDevelopers> getDevUsernameDetails(@Path("username") String username);
 }
