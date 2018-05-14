@@ -1,14 +1,11 @@
 package com.eyo.bethel.gitnaija;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -20,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -27,13 +25,9 @@ import android.widget.Toast;
 
 import com.eyo.bethel.gitnaija.Api.DevListService;
 import com.eyo.bethel.gitnaija.Api.RestApiBuilder;
-import com.eyo.bethel.gitnaija.Utilities.devAdapter;
 import com.eyo.bethel.gitnaija.data.DevList;
-import com.eyo.bethel.gitnaija.data.DeveloperDetails;
 import com.eyo.bethel.gitnaija.data.NaijaDevelopers;
 import com.google.gson.GsonBuilder;
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +45,10 @@ public class developerFragment extends Fragment {
     ListView listView;
     ImageView errorImage;
     Toolbar toolbar;
-    private List<NaijaDevelopers> loadedDeveloper = new ArrayList<>();
+    LinearLayout linearLayout;
+    developerAdapter mAdapter;
+    private List<NaijaDevelopers> usernames = new ArrayList<>();
+    private List<NaijaDevelopers> loadedDevelopers = new ArrayList<>();
 
     public static developerFragment newInstance() {
         developerFragment fragment = new developerFragment();
@@ -68,6 +65,8 @@ public class developerFragment extends Fragment {
         errorImage = (ImageView) view.findViewById(R.id.error_image);
         tryAgain = (TextView) view.findViewById(R.id.try_again);
         listView = (ListView) view.findViewById(R.id.list_view);
+        mAdapter = new developerAdapter(getActivity());
+        linearLayout = (LinearLayout) view.findViewById(R.id.linear_layout);
 
         toolbar = (Toolbar) view.findViewById(R.id.app_bar);
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
@@ -76,12 +75,6 @@ public class developerFragment extends Fragment {
         updateDeveloperList();
 
         return view;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        updateDeveloperList();
     }
 
     public void updateDeveloperList(){
@@ -96,6 +89,10 @@ public class developerFragment extends Fragment {
         }
     }
 
+    public interface onDeveloperSelected{
+        void onDeveloperClicked(int developerPosition, NaijaDevelopers developers);
+    }
+
 
     public void emptyScreenFormat(int theImage, String msg, boolean retry){
         errorImage.setImageDrawable(ContextCompat.getDrawable(getContext(), theImage));
@@ -108,11 +105,8 @@ public class developerFragment extends Fragment {
         }
     }
 
-    String devName, devBiography, devWorkplace;
-    int publicRepos;
-
     public void FetchNaijaDevelopers(){
-        String searchParams = "language:java location:lagos";
+        String searchParams = "language:java location:uyo";
         DevListService devService = new RestApiBuilder().getDevListService();
         Call<DevList> devListCall = devService.getDevList(searchParams);
         devListCall.enqueue(new Callback<DevList>() {
@@ -123,36 +117,12 @@ public class developerFragment extends Fragment {
                     DevList items = response.body();
 
                     for(int i = 0; i < items.getItems().size(); i++){
+                        final NaijaDevelopers naijaDevelopers = new NaijaDevelopers();
                         String theUsername = items.getItems().get(i).getDeveloperUsername();
-                        String imageUrl = items.getItems().get(i).getImageUrl();
-                        String devProfileUrl = items.getItems().get(i).getProfileUrl();
-                        int id = items.getItems().get(i).getId();
-                        DevListService myService = new RestApiBuilder().getDevListService();
-                        Call<NaijaDevelopers> iCall = myService.getDevUsernameDetails(theUsername);
-                        iCall.enqueue(new Callback<NaijaDevelopers>() {
-                            @SuppressLint("LongLogTag")
-                            @Override
-                            public void onResponse(Call<NaijaDevelopers> call, Response<NaijaDevelopers> response) {
-                                if (response.isSuccessful()){
-                                    Log.d("2.0 getFeed> full json developer detail =>",
-                                            new GsonBuilder().setPrettyPrinting().create().toJson(response));
-                                    devName =response.body().getFullName();
-                                    devBiography = response.body().getDevBiography();
-                                    devWorkplace = response.body().getDevWorkPlace();
-                                    publicRepos = response.body().getPublicRepos();
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(Call<NaijaDevelopers> call, Throwable t) {
-                                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                        NaijaDevelopers mNaijaDevelopers = new NaijaDevelopers(id, imageUrl, devProfileUrl, theUsername, devName, devBiography, devWorkplace, publicRepos);
-                        loadedDeveloper.add(mNaijaDevelopers);
+                        naijaDevelopers.setDeveloperUsername(theUsername);
+                        usernames.add(naijaDevelopers);
                     }
-                    fixAdapter(loadedDeveloper);
-                    progressBar.setVisibility(View.GONE);
+                    getUserName();
                 } else {
                     Toast.makeText(getContext(), "Unsuccessful response: "+response.message(), Toast.LENGTH_SHORT).show();
                 }
@@ -167,12 +137,56 @@ public class developerFragment extends Fragment {
     }
 
     public void fixAdapter(List<NaijaDevelopers> developers){
-        developerAdapter mAdapter = new developerAdapter(getActivity());
         mAdapter.exchangeData(developers);
         listView.setAdapter(mAdapter);
         toolbar.setVisibility(View.VISIBLE);
+        linearLayout.setVisibility(View.VISIBLE);
         listView.setVisibility(View.VISIBLE);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                NaijaDevelopers developerProfile = (NaijaDevelopers) mAdapter.getItem(position);
+
+                ((onDeveloperSelected) getActivity()).onDeveloperClicked(position, developerProfile);
+            }
+        });
     }
 
+    public void getUserName(){
+
+        for (NaijaDevelopers naijaDevelopers: usernames){
+            final String theUsername = naijaDevelopers.getDeveloperUsername();
+            DevListService myService = new RestApiBuilder().getDevListService();
+            Call<NaijaDevelopers> iCall = myService.getDevUsernameDetails(theUsername);
+            iCall.enqueue(new Callback<NaijaDevelopers>() {
+                @SuppressLint("LongLogTag")
+                @Override
+                public void onResponse(Call<NaijaDevelopers> call, Response<NaijaDevelopers> response) {
+                    if (response.isSuccessful()){
+                        Log.d("2.0 getFeed> full json developer detail =>",
+                                new GsonBuilder().setPrettyPrinting().create().toJson(response));
+
+                        NaijaDevelopers naijaDevelopers1 = new NaijaDevelopers();
+                        naijaDevelopers1.setFullName(response.body().getFullName());
+                        naijaDevelopers1.setDevBiography(response.body().getDevBiography());
+                        naijaDevelopers1.setDevWorkPlace(response.body().getDevWorkPlace());
+                        naijaDevelopers1.setPublicRepos(response.body().getPublicRepos());
+                        naijaDevelopers1.setDeveloperUsername(response.body().getDeveloperUsername());
+                        naijaDevelopers1.setProfileUrl(response.body().getProfileUrl());
+                        naijaDevelopers1.setImageUrl(response.body().getImageUrl());
+                        loadedDevelopers.add(naijaDevelopers1);
+                        fixAdapter(loadedDevelopers);
+                        progressBar.setVisibility(View.GONE);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<NaijaDevelopers> call, Throwable t) {
+                    Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        }
+    }
 
 }

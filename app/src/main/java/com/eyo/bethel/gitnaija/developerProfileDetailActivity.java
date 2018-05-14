@@ -29,7 +29,7 @@ public class developerProfileDetailActivity extends AppCompatActivity {
     Target target;
     ImageView headerImage;
     Fragment mFragment;
-    TextView username, profileUrl;
+    TextView username, profileUrl, biography, publicRepos, workPlace;
     private CollapsingToolbarLayout collapsingToolbarLayout;
 
     @Override
@@ -40,15 +40,31 @@ public class developerProfileDetailActivity extends AppCompatActivity {
         Bundle bundle = getIntent().getExtras();
 
         FRAG_TAG = "developerDetails";
-        mNaijaDevelopers = bundle.getParcelable("lagDeveloper");
+        mNaijaDevelopers = bundle.getParcelable("naijaDeveloper");
         setUpToolbar();
         mFragment = developerDetailFragment.newInstance();
         mFragment.setArguments(bundle);
         setFragment(mFragment);
         username = (TextView) findViewById(R.id.user_name);
         profileUrl = (TextView) findViewById(R.id.profile_url);
+        biography = (TextView) findViewById(R.id.biography);
+        publicRepos = (TextView) findViewById(R.id.pub_rep);
+        workPlace = (TextView) findViewById(R.id.workplace);
 
         username.setText(mNaijaDevelopers.getDeveloperUsername());
+        if(mNaijaDevelopers.getDevBiography() != null){
+            biography.setText(mNaijaDevelopers.getDevBiography());
+        } else {
+            biography.setText("Not available");
+        }
+        int pubRep = mNaijaDevelopers.getPublicRepos();
+        String pubRepStr = Integer.toString(pubRep);
+        publicRepos.setText(pubRepStr);
+        if (mNaijaDevelopers.getDevWorkPlace() != null){
+            workPlace.setText(mNaijaDevelopers.getDevWorkPlace());
+        } else {
+            workPlace.setText("Not available");
+        }
         profileUrl.setText(mNaijaDevelopers.getProfileUrl());
         profileUrl.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,7 +79,7 @@ public class developerProfileDetailActivity extends AppCompatActivity {
     public void setUpToolbar(){
         collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsingToolbar);
 
-        collapsingToolbarLayout.setTitle(mNaijaDevelopers.getDeveloperUsername());
+        collapsingToolbarLayout.setTitle(mNaijaDevelopers.getFullName());
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
             collapsingToolbarLayout.setCollapsedTitleTextColor(ContextCompat
                     .getColor(this,R.color.icons));

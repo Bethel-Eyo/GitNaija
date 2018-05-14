@@ -45,11 +45,18 @@ public class NaijaDevelopers implements Parcelable {
         this.publicRepos = publicRepos;
     }
 
+    public NaijaDevelopers() {
+    }
+
     private NaijaDevelopers(Parcel parcel){
         id = parcel.readInt();
         imageUrl = parcel.readString();
         profileUrl = parcel.readString();
         developerUsername = parcel.readString();
+        fullName = parcel.readString();
+        devBiography = parcel.readString();
+        devWorkPlace = parcel.readString();
+        publicRepos = parcel.readInt();
     }
 
     public String getImportedHashCode(){
@@ -138,6 +145,10 @@ public class NaijaDevelopers implements Parcelable {
         dest.writeString(imageUrl);
         dest.writeString(profileUrl);
         dest.writeString(developerUsername);
+        dest.writeString(fullName);
+        dest.writeString(devBiography);
+        dest.writeString(devWorkPlace);
+        dest.writeInt(publicRepos);
     }
 
     public static final Parcelable.Creator<NaijaDevelopers> CREATOR = new Parcelable.Creator<NaijaDevelopers>() {

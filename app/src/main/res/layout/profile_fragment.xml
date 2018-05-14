@@ -11,11 +11,34 @@
         layout="@layout/app_bar"
         android:visibility="gone"/>
 
+    <LinearLayout
+        android:id="@+id/linear_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/app_bar"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/info"
+            android:textSize="13sp"
+            android:layout_margin="10dp"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/secondary_text"/>
+
+    </LinearLayout>
+
     <ListView
-        android:layout_below="@+id/app_bar"
+        android:layout_below="@+id/linear_layout"
         android:id="@+id/list_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:divider="@null"
         android:visibility="invisible" />
 
     <ProgressBar

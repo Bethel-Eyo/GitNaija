@@ -62,9 +62,19 @@ public class developerAdapter extends BaseAdapter {
         // we can therefore bind our views accordingly
         String imageUrl = NaijaDevelopersList.get(position).getImageUrl();
         Picasso.with(mContext).load(imageUrl).into(viewHolder.profilePhoto);
-        viewHolder.developerName.setText(NaijaDevelopersList.get(position).getFullName());
-        viewHolder.mDevWorkplace.setText(NaijaDevelopersList.get(position).getDevWorkPlace());
-        //viewHolder.devPublicRepos.setText(NaijaDevelopersList.get(position).getPublicRepos());
+        if(NaijaDevelopersList.get(position).getFullName() != null){
+            viewHolder.developerName.setText(NaijaDevelopersList.get(position).getFullName());
+        } else {
+            viewHolder.developerName.setText("No name");
+        }
+        if(NaijaDevelopersList.get(position).getDevWorkPlace() != null){
+            viewHolder.mDevWorkplace.setText(NaijaDevelopersList.get(position).getDevWorkPlace());
+        } else {
+            viewHolder.mDevWorkplace.setText("Not available");
+        }
+        int pubRep = NaijaDevelopersList.get(position).getPublicRepos();
+        String pubRepStr = Integer.toString(pubRep);
+        viewHolder.devPublicRepos.setText(pubRepStr);
         return convertView;
     }
 
@@ -80,7 +90,7 @@ public class developerAdapter extends BaseAdapter {
         public developerViewHolder(View itemView){
             super(itemView);
             developerName = (TextView) itemView.findViewById(R.id.dev_name);
-            mDevWorkplace = (TextView) itemView.findViewById(R.id.dev_email);
+            mDevWorkplace = (TextView) itemView.findViewById(R.id.dev_workplace);
             profilePhoto = (CircleImageView) itemView.findViewById(R.id.profile_image);
             devPublicRepos = (TextView) itemView.findViewById(R.id.public_repos);
         }

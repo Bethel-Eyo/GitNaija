@@ -25,6 +25,7 @@
         </activity>
         <activity android:name=".NaijaDevsActivity">
         </activity>
+        <activity android:name=".developerProfileDetailActivity"/>
     </application>
 
 </manifest>
