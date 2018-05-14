@@ -1,1 +1,1 @@
-# GitNaija
+## **Name**: GitNaija
