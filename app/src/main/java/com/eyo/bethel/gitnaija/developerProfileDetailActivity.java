@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -31,6 +32,7 @@ public class developerProfileDetailActivity extends AppCompatActivity {
     Fragment mFragment;
     TextView username, profileUrl, biography, publicRepos, workPlace;
     private CollapsingToolbarLayout collapsingToolbarLayout;
+    FloatingActionButton mFab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +73,21 @@ public class developerProfileDetailActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(profileUrl.getText().toString()));
                 startActivity(intent);
+            }
+        });
+
+        mFab = (FloatingActionButton) findViewById(R.id.fab);
+        mFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent parsedIntent = new Intent(android.content.Intent.ACTION_SEND);
+                parsedIntent.setType("text/plain");
+                String parsedUsername = mNaijaDevelopers.getDeveloperUsername();
+                String parsedProfileUrl = mNaijaDevelopers.getProfileUrl();
+                String theHeader = "A Developer from Uyo, Akwa-ibom State Nigeria.";
+                String theBody = "<@" + parsedUsername  + ">" + "," + "<" + parsedProfileUrl + ">";
+                parsedIntent.putExtra(android.content.Intent.EXTRA_TEXT, theHeader  + theBody);
+                startActivity(Intent.createChooser(parsedIntent, "Share via"));
             }
         });
 
