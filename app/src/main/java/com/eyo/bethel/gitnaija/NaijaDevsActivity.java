@@ -37,4 +37,6 @@ public class NaijaDevsActivity extends AppCompatActivity implements developerFra
         intent.putExtras(bundle);
         startActivity(intent);
     }
+
+
 }

@@ -1,7 +1,10 @@
 package com.eyo.bethel.gitnaija;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -13,6 +16,9 @@ import retrofit2.Response;
 
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -35,9 +41,7 @@ import java.util.List;
 import static com.eyo.bethel.gitnaija.Utilities.Utils.isDeviceOnline;
 
 
-public class developerFragment extends Fragment {
-
-    private final String PROFILE_KEY = "profile";
+public class developerFragment extends Fragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     ProgressBar progressBar;
     View emptyScreen;
@@ -49,6 +53,8 @@ public class developerFragment extends Fragment {
     developerAdapter mAdapter;
     private List<NaijaDevelopers> usernames = new ArrayList<>();
     private List<NaijaDevelopers> loadedDevelopers = new ArrayList<>();
+    private TextView contextTxt;
+    String searchParams = "language:java location:uyo";
 
     public static developerFragment newInstance() {
         developerFragment fragment = new developerFragment();
@@ -65,22 +71,22 @@ public class developerFragment extends Fragment {
         errorImage = (ImageView) view.findViewById(R.id.error_image);
         tryAgain = (TextView) view.findViewById(R.id.try_again);
         listView = (ListView) view.findViewById(R.id.list_view);
+        contextTxt = (TextView) view.findViewById(R.id.context);
         mAdapter = new developerAdapter(getActivity());
         linearLayout = (LinearLayout) view.findViewById(R.id.linear_layout);
 
         toolbar = (Toolbar) view.findViewById(R.id.app_bar);
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
         toolbar.setTitleTextColor(getResources().getColor(R.color.icons));
-
-        updateDeveloperList();
+        setUpSharedPreferences();
 
         return view;
     }
 
-    public void updateDeveloperList(){
+    public void updateDeveloperList(String searchParams){
         String nullText;
         if (isDeviceOnline(getActivity())){
-            FetchNaijaDevelopers();
+            FetchNaijaDevelopers(searchParams);
         }else {
             emptyScreen.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.GONE);
@@ -89,9 +95,51 @@ public class developerFragment extends Fragment {
         }
     }
 
+    // this method helps to configure our sharedPreference
+    private void setUpSharedPreferences(){
+        SharedPreferences sharedPreferences = android.support.v7.preference.PreferenceManager.getDefaultSharedPreferences(getActivity());
+        loadSkillsetFromSharedPreferences(sharedPreferences);
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+    }
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(getString(R.string.pref_skill_key))){
+            loadedDevelopers.clear();
+            loadSkillsetFromSharedPreferences(sharedPreferences);
+        }
+    }
+
+    // This interface is implemented whenever a particular position in the adapter is clicked
     public interface onDeveloperSelected{
         void onDeveloperClicked(int developerPosition, NaijaDevelopers developers);
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (loadedDevelopers.isEmpty()){
+            setUpSharedPreferences();
+        } else {
+            setUpSharedPreferences();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    // this method helps load the skill-set value from the settingsActivity dynamically
+    private void loadSkillsetFromSharedPreferences(SharedPreferences sharedPreferences){
+        String skillSet = sharedPreferences.getString(getString(R.string.pref_skill_key),
+                getString(R.string.pref_skill_value_jav));
+        searchParams = "language:"+ skillSet+ " location:uyo";
+        String statement = "Showing " + skillSet + " developers in Uyo, AKS, Nigeria";
+        contextTxt.setText(statement);
+        //Toast.makeText(getContext(), searchParams, Toast.LENGTH_SHORT).show();
+        updateDeveloperList(searchParams);
+    }
+
 
 
     public void emptyScreenFormat(int theImage, String msg, boolean retry){
@@ -105,8 +153,9 @@ public class developerFragment extends Fragment {
         }
     }
 
-    public void FetchNaijaDevelopers(){
-        String searchParams = "language:java location:uyo";
+    // fetch developers using retrofit request
+    public void FetchNaijaDevelopers(String searchParams){
+        //String searchParams = "language:java location:uyo";
         DevListService devService = new RestApiBuilder().getDevListService();
         Call<DevList> devListCall = devService.getDevList(searchParams);
         devListCall.enqueue(new Callback<DevList>() {
@@ -139,9 +188,11 @@ public class developerFragment extends Fragment {
     public void fixAdapter(List<NaijaDevelopers> developers){
         mAdapter.exchangeData(developers);
         listView.setAdapter(mAdapter);
+        progressBar.setVisibility(View.GONE);
         toolbar.setVisibility(View.VISIBLE);
         linearLayout.setVisibility(View.VISIBLE);
         listView.setVisibility(View.VISIBLE);
+        contextTxt.setVisibility(View.VISIBLE);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -187,6 +238,30 @@ public class developerFragment extends Fragment {
             });
 
         }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        /* Use the inflater's inflate method to inflate our medications_menu layout to this menu */
+        inflater.inflate(R.menu.main_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            Intent startSettingsActivity = new Intent(getContext(), SettingsActivity.class);
+            startActivity(startSettingsActivity);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
 }

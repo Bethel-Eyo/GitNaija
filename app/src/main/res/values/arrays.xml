@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- skill labels -->
+    <array name="pref_skill_option_labels">
+        <item>@string/pref_skill_label_htm</item>
+        <item>@string/pref_skill_label_css</item>
+        <item>@string/pref_skill_label_jav</item>
+        <item>@string/pref_skill_label_jvs</item>
+        <item>@string/pref_skill_label_nod</item>
+        <item>@string/pref_skill_label_typ</item>
+        <item>@string/pref_skill_label_php</item>
+        <item>@string/pref_skill_label_go</item>
+        <item>@string/pref_skill_label_pyt</item>
+    </array>
+
+    <!-- skill values -->
+    <array name="pref_skill_option_values">
+        <item>@string/pref_skill_value_htm</item>
+        <item>@string/pref_skill_value_css</item>
+        <item>@string/pref_skill_value_jav</item>
+        <item>@string/pref_skill_value_jvs</item>
+        <item>@string/pref_skill_value_nod</item>
+        <item>@string/pref_skill_value_typ</item>
+        <item>@string/pref_skill_value_php</item>
+        <item>@string/pref_skill_value_go</item>
+        <item>@string/pref_skill_value_pyt</item>
+    </array>
+
+</resources>

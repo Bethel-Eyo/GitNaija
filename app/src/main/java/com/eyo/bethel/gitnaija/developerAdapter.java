@@ -59,6 +59,9 @@ public class developerAdapter extends BaseAdapter {
         }else {
             viewHolder = (developerViewHolder) convertView.getTag();
         }
+//        viewHolder.developerName.setText("");
+//        viewHolder.mDevWorkplace.setText("");
+//        viewHolder.devPublicRepos.setText("");
         // we can therefore bind our views accordingly
         String imageUrl = NaijaDevelopersList.get(position).getImageUrl();
         Picasso.with(mContext).load(imageUrl).into(viewHolder.profilePhoto);

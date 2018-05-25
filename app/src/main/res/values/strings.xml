@@ -12,4 +12,32 @@
     <string name="public_repos">public repos</string>
     <string name="bio">Biography</string>
     <string name="info">Showing java developers in Uyo, Akwa-ibom state, Nigeria</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Labels for skills Category-->
+    <string name="pref_skill_label">Categorise by Skills</string>
+
+    <string name="pref_skill_label_htm">Html</string>
+    <string name="pref_skill_label_css">Css</string>
+    <string name="pref_skill_label_jav">Java</string>
+    <string name="pref_skill_label_jvs">JavaScript</string>
+    <string name="pref_skill_label_nod">Nodejs</string>
+    <string name="pref_skill_label_typ">TypeScript</string>
+    <string name="pref_skill_label_php">Php</string>
+    <string name="pref_skill_label_go">Go</string>
+    <string name="pref_skill_label_pyt">Python</string>
+
+    <!-- values for skills Category-->
+    <string name="pref_skill_key" translatable="false">skill</string>
+
+    <string name="pref_skill_value_htm" translatable="false">html</string>
+    <string name="pref_skill_value_css" translatable="false">css</string>
+    <string name="pref_skill_value_jav" translatable="false">java</string>
+    <string name="pref_skill_value_jvs" translatable="false">javascript</string>
+    <string name="pref_skill_value_nod" translatable="false">nodejs</string>
+    <string name="pref_skill_value_typ" translatable="false">typescript</string>
+    <string name="pref_skill_value_php" translatable="false">php</string>
+    <string name="pref_skill_value_go" translatable="false">go</string>
+    <string name="pref_skill_value_pyt" translatable="false">python</string>
 </resources>

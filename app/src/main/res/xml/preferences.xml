@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="Select a skill-set">
+        <ListPreference
+            android:defaultValue="@string/pref_skill_value_jav"
+            android:entries="@array/pref_skill_option_labels"
+            android:entryValues="@array/pref_skill_option_values"
+            android:key="@string/pref_skill_key"
+            android:title="@string/pref_skill_label"/>
+    </PreferenceCategory>
+
+</PreferenceScreen>
